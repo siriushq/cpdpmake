@@ -94,15 +94,9 @@ docmds(struct name *np, struct cmd *cp)
 		}
 
 		if (sdomake && *q != '\0') {	// Ignore empty commands
-			// Get the shell to execute it
 			int status;
-			char *cmd = !signore IF_FEATURE_MAKE_EXTENSIONS(&& posix) ?
-							xconcat3("set -e;", q, "") : q;
-
 			target = np;
-			status = system(cmd);
-			if (!signore IF_FEATURE_MAKE_EXTENSIONS(&& posix))
-				free(cmd);
+			status = system(q);
 			// If this command was being run to create an include file
 			// or bring it up-to-date errors should be ignored and a
 			// failure status returned.
