@@ -1,0 +1,59 @@
+siriushq/cpdpmake
+=================
+
+A cross-platform, single-binary Makefile executor.
+
+This is intended to be runnable on Linux, macOS, Windows, FreeBSD,
+OpenBSD and NetBSD on both amd64 and arm64 architectures, out-of-the-box.
+
+This uses APE (Actually Portable Executable) as provided by the Cosmpolitan
+libc project <https://www.cosmo.zip> under ISC. No Cosmpolitan-specific
+features are used, and this project can be built as-is with most
+C toolchains.
+
+building
+========
+
+Add the latest `cpdpmake.com` release to your repository.
+
+Alternatively, build it yourself on an amd64 Linux machine (which can
+cross compile for all others supported) as follows:
+
+	# Download the `cosmocc` compiler
+	$ curl -LO https://cosmo.zip/pub/cosmocc/cosmocc.zip
+	$ unzip cosmocc.zip
+
+	# Invoke `make` providing `CC`
+	$ make CC=./cosmocc/bin/cosmocc
+
+	# Invoke it
+	$ ./cpdpmake.com -h
+
+This project is bundled with a Makefile used to build itself, but this is not
+required and with most toolchains the following command is the only requirement:
+
+	$ cc -o cpdpmake *.c
+
+using
+=====
+
+The default configuration enables some non-POSIX extensions.
+Generally, these are compatible with GNU or BSD make extensions:
+
+	- double-colon rules
+	- `ifdef`/`ifndef`/`ifeq`/`ifneq`/`else`/`endif` conditionals
+	- `lib.a(mem1.o mem2.o...)` syntax for archive members
+	- `:=` macro assignments (equivalent to POSIX `::=`)
+	- chained inference rules
+	- `*`/`?`/`[]` wildcards for filenames in target rules
+	- the `$<` and `$*` internal macros are valid for target rules
+	- skip duplicate entries in `$?`
+	- `-C directory` command line option
+	- `#` doesn't start a comment in macro expansions or build commands
+	- `#` may be escaped with a backslash
+	- macro definitions and targets can be mixed on the command line
+
+When extensions are enabled, adding the `.POSIX` target to your Makefile,
+setting (any value to) the `PDPMAKE_POSIXLY_CORRECT` environment variable,
+or passing the `--posix` flag as the first argument, will disable them
+(other versions of make tend to allow extensions even in POSIX mode).
