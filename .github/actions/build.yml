@@ -1,0 +1,48 @@
+on: {
+	push: {
+		branches: ["master"]
+	},
+	pull_request: {
+		branches: ["master"]
+	}
+}
+
+jobs: {
+	build: {
+		runs-on: "ubuntu-latest",
+		steps: [
+			{
+				uses: "actions/checkout@v4"
+			},
+			{
+				run: "mkdir -p $HOME/cosmocc"
+			},
+			{
+				uses: "actions/cache@v4",
+				id: "cache",
+				with: {
+					path: "$HOME/cosmocc",
+					key: "cosmocc-${{ runner.os }}"
+				}
+			},
+			{
+			    if: "steps.cache.outputs.cache-hit != 'true'",
+			    run: "
+                set -e;
+                wget https://cosmo.zip/pub/cosmocc/cosmocc.zip;
+                unzip -o cosmocc.zip -d $HOME/cosmocc;
+			    "
+			},
+			{
+				run: "make CC=$HOME/cosmocc/bin/cosmocc"
+			},
+			{
+				uses: "actions/upload-artifact@v4",
+				with: {
+				    name: "pdpmake.com",
+				    path: "pdpmake.com"
+				}
+			}
+		]
+	}
+}
