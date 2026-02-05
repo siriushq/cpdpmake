@@ -57,3 +57,12 @@ When extensions are enabled, adding the `.POSIX` target to your Makefile,
 setting (any value to) the `PDPMAKE_POSIXLY_CORRECT` environment variable,
 or passing the `--posix` flag as the first argument, will disable them
 (other versions of make tend to allow extensions even in POSIX mode).
+
+When using on Windows, the rules that apply to Cosmopolitan libc's
+`system` implementation (that mimics a Bourne shell) apply:
+
+	- paths are seperated with forward slashes (`/`)
+	- drive letters do not require a colon (e.g. `/C/Windows/`)
+	- some built-in utilities are available, including exit, cd, rm,
+	  [, cat, wait, exec, env, echo, read, true, test, kill, touch,
+	  rmdir, mkdir, false, mktemp, sed, tr, usleep, etc.
