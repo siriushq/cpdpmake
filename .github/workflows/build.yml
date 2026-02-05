@@ -39,8 +39,8 @@ jobs: {
 			{
 				uses: "actions/upload-artifact@v4",
 				with: {
-				    name: "pdpmake.com",
-				    path: "make"
+				    name: "cpdpmake.com",
+				    path: "cpdpmake.com"
 				}
 			}
 		]
