@@ -2,20 +2,20 @@
 .PHONY: clean
 
 OBJS = \
-	check.o \
-	input.o \
-	macro.o \
-	main.o \
-	make.o \
-	modtime.o \
-	rules.o \
-	target.o \
-	utils.o
+	source/check.o \
+	source/input.o \
+	source/macro.o \
+	source/main.o \
+	source/make.o \
+	source/modtime.o \
+	source/rules.o \
+	source/target.o \
+	source/utils.o
 
 make: $(OBJS)
 	$(CC) $(LDFLAGS) -o cpdpmake.com $(OBJS)
 
-$(OBJS): make.h
+$(OBJS): source/make.h
 
 clean:
-	rm -f $(OBJS) make
+	rm -f $(OBJS) cpdpmake.com
