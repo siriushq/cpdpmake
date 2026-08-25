@@ -39,8 +39,8 @@ arsearch(FILE *fd, const char *member)
 	do {
  top:
 		len = fread(&hdr, 1, sizeof(hdr), fd);
-		if (len < sizeof(hdr) ||
-				memcmp(hdr.ar_fmag, ARFMAG, sizeof(hdr.ar_fmag)) != 0) {
+		if (len < sizeof(hdr) || memcmp(hdr.ar_fmag,
+				ARFMAG, sizeof(hdr.ar_fmag)) != 0) {
 			if (feof(fd))
 				break;
 			error("invalid archive");
@@ -62,18 +62,23 @@ arsearch(FILE *fd, const char *member)
 				names = xmalloc(len);
 				if (fread(names, 1, len, fd) != len)
 					error("invalid archive");
+
 				// Replace newline separators with NUL
 				for (s = names; s < names + len; s++) {
 					if (*s == '\n')
 						*s = '\0';
 				}
+
 				max_offset = len;
 				goto top;
 			} else if (isdigit(hdr.ar_name[1]) && names) {
 				// An extended filename, get its offset in the names list
-				offset = argetnum(hdr.ar_name + 1, sizeof(hdr.ar_name) - 1);
+				offset = argetnum(hdr.ar_name + 1,
+					sizeof(hdr.ar_name) - 1);
+
 				if (offset > max_offset)
 					error("invalid archive");
+
 				t = names + offset;
 			} else {
 				error("invalid archive");
@@ -90,6 +95,7 @@ arsearch(FILE *fd, const char *member)
 			break;
 		}
 	} while (fseek(fd, len, SEEK_CUR) == 0);
+
 	free(names);
 	return mtime;
 }

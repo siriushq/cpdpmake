@@ -357,7 +357,8 @@ make(struct name *np, int level)
 				if (!impdep) {
 					if (doinclude)
 						return 1;
-					error("don't know how to make %s", np->n_name);
+					error("don't know how to make %s",
+						np->n_name);
 				}
 				break;
 			}
@@ -415,7 +416,8 @@ make(struct name *np, int level)
 #if ENABLE_FEATURE_MAKE_EXTENSIONS
 				if (posix || !(dp->d_name->n_flag & N_MARK))
 #endif
-					oodate = xappendword(oodate, dp->d_name->n_name);
+					oodate = xappendword(oodate,
+						dp->d_name->n_name);
 			}
 #if ENABLE_FEATURE_MAKE_POSIX_2024
 			allsrc = xappendword(allsrc, dp->d_name->n_name);
@@ -431,8 +433,8 @@ make(struct name *np, int level)
 		if ((np->n_flag & N_DOUBLE)) {
 			if (((np->n_flag & N_PHONY) || timespec_le(&np->n_tim, &dtim))) {
 				if (!(estat & MAKE_FAILURE)) {
-					estat |= make1(np, rp->r_cmd, oodate, allsrc,
-										dedup, locdep, tsuff);
+					estat |= make1(np, rp->r_cmd, oodate,
+						allsrc, dedup, locdep, tsuff);
 					dtim = (struct timespec){1, 0};
 				}
 				free(oodate);
@@ -458,14 +460,17 @@ make(struct name *np, int level)
 	np->n_flag |= N_DONE;
 	np->n_flag &= ~N_DOING;
 
-	if (!(np->n_flag & N_DOUBLE) &&
-				((np->n_flag & N_PHONY) || (timespec_le(&np->n_tim, &dtim)))) {
+	if (!(np->n_flag & N_DOUBLE) && ((np->n_flag & N_PHONY) ||
+			timespec_le(&np->n_tim, &dtim))) {
 		if (!(estat & MAKE_FAILURE)) {
 			if (sc_cmd)
-				estat |= make1(np, sc_cmd, oodate, allsrc, dedup,
-								impdep, tsuff);
-			else if (!doinclude && level == 0 && !(estat & MAKE_DIDSOMETHING))
-				warning("nothing to be done for %s", np->n_name);
+				estat |= make1(np, sc_cmd, oodate, allsrc,
+					dedup, impdep, tsuff);
+			else if (!doinclude &&
+					level == 0 &&
+					!(estat & MAKE_DIDSOMETHING))
+				warning("nothing to be done for %s",
+					np->n_name);
 		} else if (!doinclude && !quest) {
 			diagnostic("'%s' not built due to errors", np->n_name);
 		}
