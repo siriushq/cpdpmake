@@ -40,18 +40,38 @@ using
 The default configuration enables some non-POSIX extensions.
 Generally, these are compatible with GNU or BSD make extensions:
 
-	- double-colon rules
-	- `ifdef`/`ifndef`/`ifeq`/`ifneq`/`else`/`endif` conditionals
-	- `lib.a(mem1.o mem2.o...)` syntax for archive members
-	- `:=` macro assignments (equivalent to POSIX `::=`)
-	- chained inference rules
-	- `*`/`?`/`[]` wildcards for filenames in target rules
-	- the `$<` and `$*` internal macros are valid for target rules
-	- skip duplicate entries in `$?`
-	- `-C directory` command line option
-	- `#` doesn't start a comment in macro expansions or build commands
-	- `#` may be escaped with a backslash
-	- macro definitions and targets can be mixed on the command line
+	1.  double-colon rules
+	2.  `ifdef`/`ifndef`/`ifeq`/`ifneq`/`else`/`endif` conditionals
+	3.  `lib.a(mem1.o mem2.o...)` syntax for archive members
+	4.  `:=` macro assignments (equivalent to POSIX `::=`)
+	5.  chained inference rules
+	6.  `*`/`?`/`[]` wildcards for filenames in target rules
+	7.  the `$<` and `$*` internal macros are valid for target rules
+	8.  skip duplicate entries in `$?`
+	9.  `-C directory` command line option
+	10.  `#` doesn't start a comment in macro expansions or build commands
+	11.  `#` may be escaped with a backslash
+	12.  macro definitions and targets can be mixed on the command line
+
+To compare with other third-party implementations:
+
+	- in make(1) of NetBSD, OpenBSD, FreeBSD, DragonFly BSD, all features
+	  are fully supported, except:
+
+	  #2  (as they use prefixed conditionals, e.g. '.ifdef')
+	  #10 (as # may be interpreted during macro expansion, while
+	       build commands preserve it for the shell)
+
+	- in make(1) of GNU, all features are supported as-is.
+
+	- in macOS, make(1) of GNU and make(1) of NetBSD are both available in
+	  brew, as gmake(1) and bmake(1) respectively.
+
+	- in make(1) of AIX, HP-UX, Solaris (+ dmake(1)), BSD4.3, BSD4.4, and
+	  bsdmake(1) in brew on macOS, it can generally be assumed that vendor
+	  specific extensions exist and vary, but compatibility is not to be
+	  expected with these ones.  This implementation can usually just be
+	  made and ran if a project is to be built on these operating systems.
 
 When extensions are enabled, adding the `.POSIX` target to your Makefile,
 setting (any value to) the `PDPMAKE_POSIXLY_CORRECT` environment variable,
