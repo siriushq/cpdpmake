@@ -179,29 +179,28 @@ struct name *
 newname(const char *name)
 {
 	struct name *np = findname(name);
-	unsigned int bucket;
 
-	if (np != NULL)
-		return np;
+	if (np == NULL) {
+		unsigned int bucket;
 
-	if (!is_valid_target(name))
+		if (!is_valid_target(name))
 #if ENABLE_FEATURE_MAKE_EXTENSIONS
-		error("invalid target name '%s'%s", name,
-			potentially_valid_target(name) ?
-				": allow with pragma target_name" :
-				"");
+			error("invalid target name '%s'%s", name,
+					potentially_valid_target(name) ?
+						": allow with pragma target_name" : "");
 #else
-		error("invalid target name '%s'", name);
+			error("invalid target name '%s'", name);
 #endif
 
-	bucket = getbucket(name);
-	np = xmalloc(sizeof(struct name));
-	np->n_next = namehead[bucket];
-	namehead[bucket] = np;
-	np->n_name = xstrdup(name);
-	np->n_rule = NULL;
-	np->n_tim = (struct timespec){0, 0};
-	np->n_flag = 0;
+		bucket = getbucket(name);
+		np = xmalloc(sizeof(struct name));
+		np->n_next = namehead[bucket];
+		namehead[bucket] = np;
+		np->n_name = xstrdup(name);
+		np->n_rule = NULL;
+		np->n_tim = (struct timespec){0, 0};
+		np->n_flag = 0;
+	}
 	return np;
 }
 
@@ -288,26 +287,26 @@ set_pragma(const char *name)
 
 	// posix_202x is an alias for posix_2024
 	for (i = 0; i < sizeof(p_name)/sizeof(p_name[0]); ++i) {
-		if (strcmp(name, p_name[i]) != 0)
-			continue;
-
+		if (strcmp(name, p_name[i]) == 0) {
 #if !ENABLE_FEATURE_MAKE_POSIX_2024
-		if (i == BIT_POSIX_2024 || i == BIT_POSIX_202X)
-			break;
+			if (i == BIT_POSIX_2024 || i == BIT_POSIX_202X) {
+				break;
+			}
 #endif
-		if (i >= BIT_POSIX_2017) {
-			// POSIX level is stored in a separate variable.
-			// No bits in 'pragma' are used.
-			if (posix_level == DEFAULT_POSIX_LEVEL) {
-				posix_level = i - BIT_POSIX_2017;
-				if (posix_level > STD_POSIX_2024)
-					posix_level = STD_POSIX_2024;
-			} else if (posix_level != i - BIT_POSIX_2017)
-				warning("unable to change POSIX level");
-		} else {
-			pragma |= 1 << i;
+			if (i >= BIT_POSIX_2017) {
+				// POSIX level is stored in a separate variable.
+				// No bits in 'pragma' are used.
+				if (posix_level == DEFAULT_POSIX_LEVEL) {
+					posix_level = i - BIT_POSIX_2017;
+					if (posix_level > STD_POSIX_2024)
+						posix_level = STD_POSIX_2024;
+				} else if (posix_level != i - BIT_POSIX_2017)
+					warning("unable to change POSIX level");
+			} else {
+				pragma |= 1 << i;
+			}
+			return;
 		}
-		return;
 	}
 	warning("invalid pragma '%s'", name);
 }

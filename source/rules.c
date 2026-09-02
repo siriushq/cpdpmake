@@ -72,8 +72,7 @@ dyndep0(char *base, const char *tsuff, struct rule *infrule)
 					modtime(ip);
 
 				if (!chain) {
-					got_ip = ip->n_tim.tv_sec ||
-						(ip->n_flag & N_TARGET);
+					got_ip = ip->n_tim.tv_sec || (ip->n_flag & N_TARGET);
 				}
 #if ENABLE_FEATURE_MAKE_EXTENSIONS
 				else {
@@ -82,15 +81,15 @@ dyndep0(char *base, const char *tsuff, struct rule *infrule)
 					sp->n_flag &= ~N_MARK;
 				}
 #endif
-				if (!got_ip)
-					continue;
-				if (!infrule)
-					return ip;
 
-				// Prerequisite exists or we know how to make it
-				infrule->r_dep = newdep(ip, NULL);
-				infrule->r_cmd = sp->n_rule->r_cmd;
-				return ip;
+				if (got_ip) {
+					// Prerequisite exists or we know how to make it
+					if (infrule) {
+						infrule->r_dep = newdep(ip, NULL);
+						infrule->r_cmd = sp->n_rule->r_cmd;
+					}
+					return ip;
+				}
 			}
 		}
 	}
@@ -143,58 +142,51 @@ dyndep(struct name *np, struct rule *infrule, const char **ptsuff)
 	name = splitlib(np->n_name, &member);
 
 #if ENABLE_FEATURE_MAKE_EXTENSIONS
-	if (posix || member != NULL) {
-#else
-	{
+	// POSIX only allows inference rules with one or two periods.
+	// As an extension this restriction is lifted, but not for
+	// targets of the form lib.a(member.o).
+	if (!posix && member == NULL) {
+		struct name *xp = newname(".SUFFIXES");
+		int found_suffix = FALSE;
+
+		for (struct rule *rp = xp->n_rule; rp; rp = rp->r_next) {
+			for (struct depend *dp = rp->r_dep; dp; dp = dp->d_next) {
+				tsuff = dp->d_name->n_name;
+				base = has_suffix(name, tsuff);
+				if (base) {
+					found_suffix = TRUE;
+					pp = dyndep0(base, tsuff, infrule);
+					free(base);
+					if (pp) {
+						goto done;
+					}
+				}
+			}
+		}
+
+		if (!found_suffix) {
+			// The name didn't have a known suffix. Try single-suffix rule.
+			tsuff = "";
+			pp = dyndep0(name, tsuff, infrule);
+			if (pp) {
+ done:
+				if (ptsuff) {
+					*ptsuff = tsuff;
+				}
+			}
+		}
+	} else
 #endif
+	{
 		tsuff = xstrdup(suffix(name));
 		base = member ? member : name;
 		*suffix(base) = '\0';
 
 		pp = dyndep0(base, tsuff, infrule);
 		free((void *)tsuff);
-
-		free(name);
-		return pp;
 	}
-
-#if ENABLE_FEATURE_MAKE_EXTENSIONS
-	// POSIX only allows inference rules with one or two periods.
-	// As an extension this restriction is lifted, but not for
-	// targets of the form lib.a(member.o).
-
-	struct name *xp = newname(".SUFFIXES");
-	int found_suffix = FALSE;
-
-	for (struct rule *rp = xp->n_rule; rp; rp = rp->r_next) {
-		for (struct depend *dp = rp->r_dep; dp; dp = dp->d_next) {
-			tsuff = dp->d_name->n_name;
-			base = has_suffix(name, tsuff);
-			if (base) {
-				found_suffix = TRUE;
-				pp = dyndep0(base, tsuff, infrule);
-				free(base);
-				if (pp) {
-					goto done;
-				}
-			}
-		}
-	}
-
-	if (!found_suffix) {
-		// The name didn't have a known suffix. Try single-suffix rule.
-		tsuff = "";
-		pp = dyndep0(name, tsuff, infrule);
-		if (pp) {
- done:
-			if (ptsuff) {
-				*ptsuff = tsuff;
-			}
-		}
-	}
-#endif
-
 	free(name);
+
 	return pp;
 }
 
